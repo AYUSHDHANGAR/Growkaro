@@ -1,0 +1,192 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: optictr-ai
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: optictr-secrets
+  namespace: optictr-ai
+type: Opaque
+stringData:
+  jwt-secret-key: replace-with-secure-secret
+  database-url: postgresql+psycopg://optictr:optictr@postgres:5432/optictr
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: optictr-config
+  namespace: optictr-ai
+data:
+  frontend-url: "https://optictr.example.com"
+  api-url: "https://api.optictr.example.com"
+  redis-url: "redis://redis:6379/0"
+  celery-broker-url: "redis://redis:6379/1"
+  celery-result-backend: "redis://redis:6379/2"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: optictr-api
+  namespace: optictr-ai
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: optictr-api
+  template:
+    metadata:
+      labels:
+        app: optictr-api
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/your-org/optictr-api:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: optictr-secrets
+                  key: database-url
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: optictr-secrets
+                  key: jwt-secret-key
+            - name: REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: optictr-config
+                  key: redis-url
+            - name: CELERY_BROKER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: optictr-config
+                  key: celery-broker-url
+            - name: CELERY_RESULT_BACKEND
+              valueFrom:
+                configMapKeyRef:
+                  name: optictr-config
+                  key: celery-result-backend
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: optictr-api
+  namespace: optictr-ai
+spec:
+  selector:
+    app: optictr-api
+  ports:
+    - port: 8000
+      targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: optictr-worker
+  namespace: optictr-ai
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: optictr-worker
+  template:
+    metadata:
+      labels:
+        app: optictr-worker
+    spec:
+      containers:
+        - name: worker
+          image: ghcr.io/your-org/optictr-api:latest
+          command: ["celery", "-A", "app.workers.celery_app.celery_app", "worker", "--loglevel=info"]
+          envFrom:
+            - configMapRef:
+                name: optictr-config
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: optictr-secrets
+                  key: database-url
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: optictr-secrets
+                  key: jwt-secret-key
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: optictr-frontend
+  namespace: optictr-ai
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: optictr-frontend
+  template:
+    metadata:
+      labels:
+        app: optictr-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: ghcr.io/your-org/optictr-frontend:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NEXT_PUBLIC_API_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: optictr-config
+                  key: api-url
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: optictr-frontend
+  namespace: optictr-ai
+spec:
+  selector:
+    app: optictr-frontend
+  ports:
+    - port: 3000
+      targetPort: 3000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: optictr-ingress
+  namespace: optictr-ai
+spec:
+  rules:
+    - host: optictr.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: optictr-frontend
+                port:
+                  number: 3000
+    - host: api.optictr.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: optictr-api
+                port:
+                  number: 8000

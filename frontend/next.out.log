@@ -1,0 +1,16 @@
+
+> optictr-ai-frontend@1.0.0 dev
+> next dev --hostname 127.0.0.1 --port 3000
+
+   ▲ Next.js 15.5.18
+   - Local:        http://127.0.0.1:3000
+   - Network:      http://127.0.0.1:3000
+
+ ✓ Starting...
+ ✓ Ready in 16.2s
+ ○ Compiling / ...
+ ✓ Compiled / in 50.2s (2383 modules)
+ GET / 200 in 882ms
+ GET / 200 in 940ms
+ ✓ Compiled in 9.2s (2383 modules)
+ GET / 200 in 1068ms
