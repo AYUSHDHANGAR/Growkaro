@@ -1,4 +1,5 @@
 # Growkaro
+<<<<<<< HEAD
 
 Growkaro is a full-stack advertisement optimization platform for quality-product growth. It helps local businesses choose better target ads, explains results in simple language, and keeps professional UCB reinforcement-learning analytics available for analysts.
 
@@ -97,3 +98,6 @@ docker-compose.yml     Local production-like stack
 ## Production Notes
 
 Before real deployment, replace development secrets, add managed PostgreSQL and Redis, configure email/OAuth providers, add Alembic migrations, connect object storage for uploads/reports, and enable HTTPS at the ingress/load balancer.
+=======
+coding is fun lets contribute .
+>>>>>>> 683e32364af214ffb6f740a2968fd21ddcd72a02
