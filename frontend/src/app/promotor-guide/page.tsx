@@ -80,7 +80,7 @@ export default function PromotorGuidePage() {
           {[
             ["Cheap first test", "Start with Facebook Traffic, TikTok, or Google Display retargeting when budget is tight."],
             ["Best intent", "Use Google Search for loan, service, repair, and urgent demand because users are already searching."],
-            ["Best learning", "Use the same offer across two channels, then compare CTR, CPC, and saved GrowScore history."]
+            ["Best learning", "Use the same offer across two channels, then compare CTR, CPC, update the history."]
           ].map(([title, body]) => (
             <article key={title} className="glass-panel rounded-lg p-5">
               <Target className="h-6 w-6 text-roseEdge" />
