@@ -18,8 +18,8 @@ body {
   margin: 0;
   min-width: 320px;
   background:
-    radial-gradient(circle at top left, rgba(116, 247, 182, 0.13), transparent 32rem),
-    radial-gradient(circle at 82% 12%, rgba(248, 196, 93, 0.1), transparent 28rem),
+    radial-gradient(circle at top left, rgba(116, 219, 247, 0.13), transparent 32rem),
+    radial-gradient(circle at 82% 12%, rgba(93, 199, 248, 0.1), transparent 28rem),
     linear-gradient(135deg, #070a16 0%, #07131b 45%, #100a18 100%);
   color: #f8fbff;
   font-family: Arial, Helvetica, sans-serif;

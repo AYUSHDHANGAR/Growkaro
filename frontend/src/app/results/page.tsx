@@ -43,7 +43,7 @@ export default function ResultsPage() {
 
   function saveRecord(nextRecord: AnalysisRecord) {
     if (!session) {
-      setMessage("Login is required before saving or viewing results.");
+      setMessage("please log in first ! ");
       router.replace("/login");
       return;
     }
