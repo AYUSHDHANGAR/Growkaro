@@ -27,9 +27,9 @@ class Settings(BaseSettings):
     allowed_upload_extensions: set[str] = {".csv", ".xlsx"}
 
     rate_limit_per_minute: int = 120
-    default_admin_email: str = "admin@growkaro.com"
+    default_admin_email: str | None = None
     default_admin_name: str = "Growkaro Admin"
-    default_admin_password: str = "Growkaro@123"
+    default_admin_password: str | None = None
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

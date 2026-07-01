@@ -12,11 +12,12 @@ router = APIRouter()
 
 @router.post("/signup", response_model=TokenResponse)
 def signup(payload: SignupRequest, db: Session = Depends(get_db)) -> TokenResponse:
-    existing = db.query(User).filter(User.email == payload.email.lower()).first()
+    email = payload.email.lower()
+    existing = db.query(User).filter(User.email == email).first()
     if existing:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
 
-    user = User(email=payload.email.lower(), name=payload.name, password_hash=hash_password(payload.password))
+    user = User(email=email, name=payload.name, password_hash=hash_password(payload.password))
     db.add(user)
     db.commit()
     db.refresh(user)

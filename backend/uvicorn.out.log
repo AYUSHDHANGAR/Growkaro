@@ -1,1 +1,19 @@
-INFO:     127.0.0.1:50515 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57754 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57753 - "POST /auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53712 - "OPTIONS /auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53712 - "POST /auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53548 - "OPTIONS /auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53549 - "OPTIONS /auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53556 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53558 - "POST /auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53568 - "POST /auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53926 - "POST /auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62883 - "GET / HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62883 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:63175 - "OPTIONS /auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63175 - "POST /auth/login HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:63068 - "POST /auth/login HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:63068 - "POST /auth/login HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:56859 - "POST /auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62654 - "OPTIONS /auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64497 - "POST /auth/login HTTP/1.1" 200 OK

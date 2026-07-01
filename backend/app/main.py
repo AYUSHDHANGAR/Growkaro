@@ -9,6 +9,9 @@ from app.models.database import User
 
 
 def ensure_default_admin() -> None:
+    if not settings.default_admin_email or not settings.default_admin_password:
+        return
+
     with SessionLocal() as db:
         email = settings.default_admin_email.lower()
         admin_user = db.query(User).filter(User.email == email).first()
