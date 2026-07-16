@@ -4,6 +4,8 @@ from pathlib import Path
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+BACKEND_DIR = Path(__file__).resolve().parents[2]
+
 
 class Settings(BaseSettings):
     app_name: str = "Growkaro"
@@ -31,7 +33,7 @@ class Settings(BaseSettings):
     default_admin_name: str = "Growkaro Admin"
     default_admin_password: str | None = None
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(env_file=BACKEND_DIR / ".env", env_file_encoding="utf-8")
 
 
 @lru_cache

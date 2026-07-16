@@ -15,6 +15,8 @@ def get_current_user(token: str | None = Depends(oauth2_scheme), db: Session = D
     payload = decode_token(token)
     if not payload:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+    if payload.get("type") != "access":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Access token required")
     user = db.query(User).filter(User.id == payload.get("sub")).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")

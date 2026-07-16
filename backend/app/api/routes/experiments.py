@@ -43,7 +43,12 @@ def train_model(
     db.refresh(experiment)
 
     frame = load_dataset(dataset.stored_path)
-    result = get_model(payload.algorithm, payload.parameters).fit(frame).to_dict()
+    try:
+        result = get_model(payload.algorithm, payload.parameters).fit(frame).to_dict()
+    except ValueError as error:
+        experiment.status = "failed"
+        db.commit()
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
     insights = generate_insights(result)
 
     experiment.status = "completed"
@@ -208,4 +213,7 @@ def compare_models(dataset_id: str, db: Session = Depends(get_db), user: User = 
     if dataset.owner_id != user.id and user.role != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Dataset access denied")
     frame = load_dataset(dataset.stored_path)
-    return compare_algorithms(frame)
+    try:
+        return compare_algorithms(frame)
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error

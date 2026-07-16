@@ -24,7 +24,10 @@ def simulate(payload: SimulateRequest, db: Session = Depends(get_db), user: User
     else:
         frame = synthetic_dataset(payload.rounds)
 
-    result = get_model(payload.algorithm).fit(frame).to_dict()
+    try:
+        result = get_model(payload.algorithm).fit(frame).to_dict()
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
     simulation = Simulation(status="completed", speed=payload.speed, payload=result)
     db.add(simulation)
     db.commit()

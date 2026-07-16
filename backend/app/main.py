@@ -1,3 +1,6 @@
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -33,6 +36,13 @@ def ensure_default_admin() -> None:
         db.commit()
 
 
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    Base.metadata.create_all(bind=engine)
+    ensure_default_admin()
+    yield
+
+
 def create_app() -> FastAPI:
     app = FastAPI(
         title="Growkaro API",
@@ -40,6 +50,7 @@ def create_app() -> FastAPI:
         version="1.0.0",
         docs_url="/docs",
         redoc_url="/redoc",
+        lifespan=lifespan,
     )
 
     app.add_middleware(
@@ -57,11 +68,6 @@ def create_app() -> FastAPI:
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         return response
-
-    @app.on_event("startup")
-    def startup() -> None:
-        Base.metadata.create_all(bind=engine)
-        ensure_default_admin()
 
     app.include_router(auth.router, prefix="/auth", tags=["auth"])
     app.include_router(datasets.router, tags=["datasets"])
