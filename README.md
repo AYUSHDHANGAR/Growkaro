@@ -1,17 +1,39 @@
 # Growkaro
-<<<<<<< HEAD
 
 Growkaro is a full-stack advertisement optimization platform for quality-product growth. It helps local businesses choose better target ads, explains results in simple language, and keeps professional UCB reinforcement-learning analytics available for analysts.
 
 ## What Is Built
 
-- Growkaro-branded Next.js, React, TypeScript, Tailwind CSS, Framer Motion, and Recharts frontend.
-- FastAPI backend with JWT auth routes, dataset upload, validation, training, analytics, simulations, and leaderboard endpoints.
+- Growkaro-branded Next.js, React, JavaScript, Tailwind CSS, Framer Motion, and Recharts frontend.
+- FastAPI backend with JWT auth routes, dataset upload, validation, training, analytics, simulations, and admin endpoints.
 - Modular ML engine in `backend/app/ml_models/` with UCB, Thompson Sampling, Epsilon Greedy, Softmax, and Random Baseline.
-- Target-ad planner, guide/suggestion UI, non-technical result language, and GrowScore performance meter.
+- Login/signup protection so users must authenticate before using results, optimization, guide, ad creation, and admin tools.
+- Separate saved analysis history for each user.
+- Admin panel for reviewing users and saved analysis data.
 - PostgreSQL-ready SQLAlchemy schema for users, datasets, experiments, model results, analytics, reports, simulations, and audit logs.
 - Redis/Celery worker scaffold for async training.
 - Docker Compose, Kubernetes manifests, and GitHub Actions CI.
+
+## Local Admin Login
+
+For local testing, the backend can create this demo admin account on startup:
+
+```text
+Admin email: ayushdhangar7017@gmail.com
+Admin password: Ayush@7017
+```
+
+These credentials are for local testing only. Change them before any real deployment and do not use them for a real Gmail account.
+
+Create `backend/.env` and include:
+
+```env
+DEFAULT_ADMIN_EMAIL=ayushdhangar7017@gmail.com
+DEFAULT_ADMIN_NAME=Growkaro Admin
+DEFAULT_ADMIN_PASSWORD=Ayush@7017
+```
+
+Then restart the backend. The admin account is created when the backend starts and the user does not already exist in the database.
 
 ## Core UCB Logic
 
@@ -74,6 +96,8 @@ docker compose up --build
 - `POST /compare-models/{dataset_id}`
 - `POST /auth/signup`
 - `POST /auth/login`
+- `GET /admin/system-analytics`
+- `GET /admin/analysis-history`
 
 ## Dataset Format
 
@@ -87,7 +111,7 @@ Each column is an ad. Each row is a user impression.
 ## Project Structure
 
 ```text
-frontend/              Next.js SaaS UI
+frontend/              Next.js app UI
 backend/               FastAPI backend and ML engine
 backend/app/ml_models/ Modular bandit algorithms
 infra/k8s/             Kubernetes deployment manifests
@@ -98,6 +122,3 @@ docker-compose.yml     Local production-like stack
 ## Production Notes
 
 Before real deployment, replace development secrets, add managed PostgreSQL and Redis, configure email/OAuth providers, add Alembic migrations, connect object storage for uploads/reports, and enable HTTPS at the ingress/load balancer.
-=======
-coding is fun lets contribute .
->>>>>>> 683e32364af214ffb6f740a2968fd21ddcd72a02
