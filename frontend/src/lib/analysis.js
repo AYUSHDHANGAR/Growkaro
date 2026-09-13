@@ -137,10 +137,21 @@ export function getAdDecision(ad, rank, averageCtr) {
         nextStep: "Do not scale it. Make a new version before spending again."
     };
 }
+function safeId() {
+    if (typeof globalThis !== "undefined" && globalThis.crypto?.randomUUID) {
+        try {
+            return globalThis.crypto.randomUUID();
+        } catch {
+            // fallback if insecure context
+        }
+    }
+    return `rec-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
 export function buildAnalysisRecord(stats, session, source = "upload") {
     const growScore = getGrowScore(stats);
     return {
-        id: crypto.randomUUID(),
+        id: safeId(),
         ownerEmail: session?.email ?? "guest@growkaro.local",
         ownerName: session?.name ?? "Guest user",
         createdAt: new Date().toISOString(),

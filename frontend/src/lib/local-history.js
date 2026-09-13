@@ -146,7 +146,12 @@ function getHistoryOwnerFromKey(key) {
     }
 }
 function makeRecordId() {
-    return globalThis.crypto?.randomUUID?.() ?? `record-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    try {
+        if (typeof globalThis !== "undefined" && globalThis.crypto?.randomUUID) {
+            return globalThis.crypto.randomUUID();
+        }
+    } catch {}
+    return `record-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 function normalizeStats(stats = {}) {
     return {

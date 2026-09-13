@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { 
     Bar, 
     BarChart, 
@@ -26,23 +26,42 @@ import {
     TrendingUp, 
     Zap 
 } from "lucide-react";
-import { benchmarkModelsData, benchmarkProgressionData } from "@/lib/bandit-algorithms";
+import { benchmarkModelsData, benchmarkProgressionData, runClientSideMultiModelBenchmark } from "@/lib/bandit-algorithms";
 
 const numberFormatter = new Intl.NumberFormat("en-US");
 
-export function MultiModelComparison() {
+export function MultiModelComparison({ customStats }) {
     const [chartMode, setChartMode] = useState("ctr"); // "ctr" | "regret"
     const [showVivaNotes, setShowVivaNotes] = useState(false);
-    const [selectedModel, setSelectedModel] = useState(benchmarkModelsData[0]);
 
-    const barChartData = benchmarkModelsData.map((m) => ({
+    const modelsData = useMemo(() => {
+        if (customStats?.matrix && customStats?.adNames) {
+            return runClientSideMultiModelBenchmark(customStats.matrix, customStats.adNames);
+        }
+        return benchmarkModelsData;
+    }, [customStats]);
+
+    const [selectedModel, setSelectedModel] = useState(modelsData[0]);
+
+    useEffect(() => {
+        if (modelsData?.length) {
+            setSelectedModel(modelsData[0]);
+        }
+    }, [modelsData]);
+
+    const barChartData = useMemo(() => modelsData.map((m) => ({
         algorithm: m.shortType,
         fullName: m.name,
         ctr: Number(m.ctr.toFixed(2)),
         reward: m.totalReward,
         regret: m.regret,
         fill: m.color
-    }));
+    })), [modelsData]);
+
+    const thompsonModel = modelsData.find((m) => m.id === "thompson_sampling") || modelsData[0];
+    const ucbModel = modelsData.find((m) => m.id === "ucb") || modelsData[1];
+    const egModel = modelsData.find((m) => m.id === "epsilon_greedy") || modelsData[2];
+    const abModel = modelsData.find((m) => m.id === "traditional_ab") || modelsData[4];
 
     return (
         <section id="rl-comparison" className="glass-panel rounded-3xl p-6 shadow-glow border border-white/10">
@@ -58,8 +77,14 @@ export function MultiModelComparison() {
                     </h2>
                     <p className="mt-1 max-w-3xl text-sm leading-6 text-white/60">
                         Comparing <strong className="text-white">Thompson Sampling, UCB1, ε-Greedy, and Softmax</strong> against 
-                        traditional static A/B testing on 10,000 real impression records.
+                        traditional static A/B testing {customStats ? `on ${numberFormatter.format(customStats.rows)} impression records.` : "on 10,000 real impression records."}
                     </p>
+                    {customStats && (
+                        <div className="mt-2 inline-flex items-center gap-2 rounded-lg border border-cyanEdge/30 bg-cyanEdge/10 px-3 py-1 text-xs font-bold text-cyan-200">
+                            <CheckCircle2 className="h-3.5 w-3.5 text-limeSignal" />
+                            Live calculation active on: {customStats.filename || "Uploaded dataset"} ({customStats.columns} ads, {numberFormatter.format(customStats.rows)} impressions)
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -113,8 +138,8 @@ export function MultiModelComparison() {
                         <Award className="h-5 w-5 text-limeSignal" />
                     </div>
                     <p className="mt-2 text-2xl font-black text-white">Thompson Sampling</p>
-                    <p className="mt-1 text-sm font-bold text-limeSignal">26.17% CTR (+109% lift)</p>
-                    <p className="mt-2 text-xs text-white/50">Lowest regret (only 78 missed clicks)</p>
+                    <p className="mt-1 text-sm font-bold text-limeSignal">{thompsonModel.ctr.toFixed(2)}% CTR ({thompsonModel.vsAbLift})</p>
+                    <p className="mt-2 text-xs text-white/50">Lowest regret: only {numberFormatter.format(thompsonModel.regret)} missed clicks</p>
                 </div>
 
                 <div className="rounded-2xl border border-cyanEdge/30 bg-cyanEdge/[0.08] p-4">
@@ -123,8 +148,8 @@ export function MultiModelComparison() {
                         <Zap className="h-5 w-5 text-cyanEdge" />
                     </div>
                     <p className="mt-2 text-2xl font-black text-white">UCB1 Algorithm</p>
-                    <p className="mt-1 text-sm font-bold text-cyanEdge">21.78% CTR (+74% lift)</p>
-                    <p className="mt-2 text-xs text-white/50">Locks winner Ad 5 with high certainty</p>
+                    <p className="mt-1 text-sm font-bold text-cyanEdge">{ucbModel.ctr.toFixed(2)}% CTR ({ucbModel.vsAbLift})</p>
+                    <p className="mt-2 text-xs text-white/50">Locks winner {ucbModel.bestAd} with high certainty</p>
                 </div>
 
                 <div className="rounded-2xl border border-violetEdge/30 bg-violetEdge/[0.08] p-4">
@@ -132,9 +157,9 @@ export function MultiModelComparison() {
                         <span className="text-xs font-black uppercase text-violetEdge">Classic RL Baseline</span>
                         <Flame className="h-5 w-5 text-violetEdge" />
                     </div>
-                    <p className="mt-2 text-2xl font-black text-white">ε-Greedy & Softmax</p>
-                    <p className="mt-1 text-sm font-bold text-violetEdge">20.37% & 16.66% CTR</p>
-                    <p className="mt-2 text-xs text-white/50">Both beat traditional testing easily</p>
+                    <p className="mt-2 text-2xl font-black text-white">ε-Greedy</p>
+                    <p className="mt-1 text-sm font-bold text-violetEdge">{egModel.ctr.toFixed(2)}% CTR</p>
+                    <p className="mt-2 text-xs text-white/50">{egModel.vsAbLift}</p>
                 </div>
 
                 <div className="rounded-2xl border border-rose-500/30 bg-rose-500/[0.08] p-4">
@@ -143,8 +168,8 @@ export function MultiModelComparison() {
                         <ShieldAlert className="h-5 w-5 text-rose-400" />
                     </div>
                     <p className="mt-2 text-2xl font-black text-white">Static A/B Testing</p>
-                    <p className="mt-1 text-sm font-bold text-rose-400">12.51% CTR (Baseline)</p>
-                    <p className="mt-2 text-xs text-white/50">Lost 1,444 potential customer clicks</p>
+                    <p className="mt-1 text-sm font-bold text-rose-400">{abModel.ctr.toFixed(2)}% CTR (Baseline)</p>
+                    <p className="mt-2 text-xs text-white/50">Lost {numberFormatter.format(abModel.regret)} potential customer clicks</p>
                 </div>
             </div>
 
@@ -233,12 +258,12 @@ export function MultiModelComparison() {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
-                        {benchmarkModelsData.map((model) => (
+                        {modelsData.map((model) => (
                             <tr 
                                 key={model.id}
                                 onClick={() => setSelectedModel(model)}
                                 className={`cursor-pointer transition hover:bg-white/[0.06] ${
-                                    selectedModel.id === model.id ? "bg-white/[0.08]" : ""
+                                    selectedModel?.id === model.id ? "bg-white/[0.08]" : ""
                                 }`}
                             >
                                 <td className="px-4 py-3.5 font-black text-white">
@@ -274,18 +299,20 @@ export function MultiModelComparison() {
             </div>
 
             {/* Selected Model Explanation Drawer */}
-            <div className="mt-4 rounded-2xl border border-white/10 bg-midnight/60 p-4">
-                <div className="flex items-center gap-2 text-sm font-black text-white">
-                    <TrendingUp className="h-4 w-4 text-limeSignal" />
-                    <span>How {selectedModel.name} works:</span>
+            {selectedModel && (
+                <div className="mt-4 rounded-2xl border border-white/10 bg-midnight/60 p-4">
+                    <div className="flex items-center gap-2 text-sm font-black text-white">
+                        <TrendingUp className="h-4 w-4 text-limeSignal" />
+                        <span>How {selectedModel.name} works:</span>
+                    </div>
+                    <p className="mt-1.5 text-xs leading-5 text-white/70">
+                        {selectedModel.intuition}
+                    </p>
+                    <div className="mt-2 font-mono text-xs text-cyanEdge/90">
+                        Formula: <span className="rounded bg-black/40 px-2 py-0.5">{selectedModel.formula}</span>
+                    </div>
                 </div>
-                <p className="mt-1.5 text-xs leading-5 text-white/70">
-                    {selectedModel.intuition}
-                </p>
-                <div className="mt-2 font-mono text-xs text-cyanEdge/90">
-                    Formula: <span className="rounded bg-black/40 px-2 py-0.5">{selectedModel.formula}</span>
-                </div>
-            </div>
+            )}
         </section>
     );
 }

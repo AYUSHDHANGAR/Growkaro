@@ -26,6 +26,8 @@ export function parseCsvPreview(filename, text) {
         totalClicks,
         overallCtr: (totalClicks / Math.max(totalImpressions, 1)) * 100,
         bestAd: headers[bestIndex],
-        adDetails
+        adDetails,
+        matrix: rows,
+        adNames: headers
     };
 }

@@ -80,7 +80,7 @@ export async function uploadDataset(file) {
             method: "POST",
             body,
             headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined
-        }, 8000);
+        }, 2500);
         if (!response.ok) {
             return null;
         }

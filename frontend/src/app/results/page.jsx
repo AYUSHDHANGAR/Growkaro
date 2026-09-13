@@ -189,7 +189,7 @@ export default function ResultsPage() {
           {record && (
             <div className="space-y-6">
               <ResultSummary record={record} onExportPdf={(budget) => openPdfReport(record, budget)}/>
-              <MultiModelComparison />
+              <MultiModelComparison customStats={record.stats} />
             </div>
           )}
         </div>
