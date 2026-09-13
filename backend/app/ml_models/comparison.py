@@ -30,5 +30,5 @@ def get_model(algorithm: str, parameters: dict[str, Any] | None = None) -> Bandi
 
 
 def compare_algorithms(data: pd.DataFrame, algorithms: list[str] | None = None) -> dict[str, dict]:
-    algorithms = algorithms or ["ucb", "thompson_sampling", "epsilon_greedy", "random_baseline"]
+    algorithms = algorithms or ["ucb", "thompson_sampling", "epsilon_greedy", "softmax", "random_baseline"]
     return {algorithm: get_model(algorithm).fit(data).to_dict() for algorithm in algorithms}

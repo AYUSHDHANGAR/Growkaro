@@ -24,4 +24,4 @@ def test_model_comparison_returns_required_algorithms() -> None:
     data = pd.DataFrame({"Ad 1": [0, 1, 0, 1], "Ad 2": [1, 1, 1, 0]})
     result = compare_algorithms(data)
 
-    assert {"ucb", "thompson_sampling", "epsilon_greedy", "random_baseline"} == set(result)
+    assert {"ucb", "thompson_sampling", "epsilon_greedy", "softmax", "random_baseline"} == set(result)

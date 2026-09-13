@@ -11,6 +11,7 @@ import { uploadDataset } from "@/lib/api";
 import { parseCsvPreview } from "@/lib/csv";
 import { getSession, saveAnalysis } from "@/lib/local-history";
 import { openPdfReport } from "@/lib/report";
+import { MultiModelComparison } from "@/components/dashboard/MultiModelComparison";
 const emptyRows = [
     { ad: "Ad 1", impressions: 1000, clicks: 48, ctr: 0 },
     { ad: "Ad 2", impressions: 1000, clicks: 72, ctr: 0 },
@@ -185,7 +186,12 @@ export default function ResultsPage() {
             </button>
           </section>)}
 
-          {record && <ResultSummary record={record} onExportPdf={(budget) => openPdfReport(record, budget)}/>}
+          {record && (
+            <div className="space-y-6">
+              <ResultSummary record={record} onExportPdf={(budget) => openPdfReport(record, budget)}/>
+              <MultiModelComparison />
+            </div>
+          )}
         </div>
 
         <div key={historyVersion}>

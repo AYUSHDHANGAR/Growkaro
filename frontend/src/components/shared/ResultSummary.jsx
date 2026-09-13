@@ -11,9 +11,10 @@ const currencyFormatter = new Intl.NumberFormat("en-IN", {
 });
 export function ResultSummary({ record, onExportPdf }) {
     const [totalBudget, setTotalBudget] = useState(10000);
+    const [selectedAlgo, setSelectedAlgo] = useState("ucb");
     const rankedAds = useMemo(() => getRankedAds(record.stats), [record.stats]);
     const topAds = useMemo(() => getTopResultAds(record.stats), [record.stats]);
-    const budgetPlan = useMemo(() => getBudgetAllocation(record.stats, totalBudget), [record.stats, totalBudget]);
+    const budgetPlan = useMemo(() => getBudgetAllocation(record.stats, totalBudget, selectedAlgo), [record.stats, totalBudget, selectedAlgo]);
     const totalImpressions = record.stats.adDetails?.reduce((sum, ad) => sum + ad.impressions, 0) ?? record.stats.rows * record.stats.columns;
     const averageCtr = record.stats.overallCtr;
     const decisionTone = {
@@ -124,6 +125,39 @@ export function ResultSummary({ record, onExportPdf }) {
               Total promotion budget
               <input type="number" min={0} value={totalBudget} onChange={(event) => setTotalBudget(Number(event.target.value))} className="rounded-lg border border-white/10 bg-midnight/70 px-3 py-3 text-white outline-none"/>
             </label>
+
+            <div className="mt-5">
+              <p className="text-xs font-black uppercase text-cyanEdge">Allocation Algorithm</p>
+              <div className="mt-2 grid grid-cols-2 gap-1.5 rounded-xl border border-white/15 bg-white/5 p-1 text-xs sm:grid-cols-3">
+                {[
+                  { id: "thompson_sampling", label: "Thompson (RL)" },
+                  { id: "ucb", label: "UCB1 (RL)" },
+                  { id: "epsilon_greedy", label: "ε-Greedy (RL)" },
+                  { id: "softmax", label: "Softmax (RL)" },
+                  { id: "traditional_ab", label: "Static A/B" }
+                ].map((algo) => (
+                  <button
+                    key={algo.id}
+                    type="button"
+                    onClick={() => setSelectedAlgo(algo.id)}
+                    className={`rounded-lg px-2.5 py-2 font-bold transition text-center ${
+                      selectedAlgo === algo.id
+                        ? "bg-limeSignal text-midnight shadow"
+                        : "text-white/60 hover:text-white"
+                    }`}
+                  >
+                    {algo.label}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-2 text-xs leading-5 text-white/50">
+                {selectedAlgo === "thompson_sampling" && "🏆 Thompson: Bayesian posterior weights strongly prioritize the top winner while testing contenders."}
+                {selectedAlgo === "ucb" && "⭐ UCB1: Upper Confidence Bound deterministic exploration-exploitation trade-off."}
+                {selectedAlgo === "epsilon_greedy" && "ε-Greedy: Allocates 90% direct to best ad, 10% randomly across others."}
+                {selectedAlgo === "softmax" && "Softmax: Probability-proportional Boltzmann temperature distribution."}
+                {selectedAlgo === "traditional_ab" && "⚠️ Traditional A/B: Static equal 1/K split to all ads. Inefficient because losing ads consume equal budget!"}
+              </p>
+            </div>
           </div>
           <div className="grid gap-3">
             {budgetPlan.map((ad, index) => (<article key={ad.ad} className="rounded-lg border border-white/10 bg-white/[0.04] p-4">

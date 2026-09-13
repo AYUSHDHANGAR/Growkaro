@@ -61,13 +61,36 @@ export function getRankedAds(stats) {
 export function getTopResultAds(stats) {
     return getRankedAds(stats);
 }
-export function getBudgetAllocation(stats, totalBudget) {
+export function getBudgetAllocation(stats, totalBudget, algorithm = "ucb") {
     const topAds = getTopResultAds(stats);
     const safeBudget = Math.max(0, totalBudget);
-    const rawWeights = topAds.map((ad, index) => {
-        const rankBoost = topAds.length - index;
-        return Math.max(ad.ctr, 0.01) * rankBoost;
-    });
+    if (topAds.length === 0) return [];
+
+    let rawWeights;
+    if (algorithm === "traditional_ab") {
+        // Equal 1/K allocation for static A/B testing (non-adaptive baseline)
+        rawWeights = topAds.map(() => 1);
+    } else if (algorithm === "thompson_sampling") {
+        // Bayesian posterior win allocation: strongly favors the proven winner
+        rawWeights = topAds.map((ad, index) => {
+            const power = Math.max(1, topAds.length - index);
+            return Math.pow(Math.max(ad.ctr, 0.01), 1.8) * Math.pow(power, 1.5);
+        });
+    } else if (algorithm === "epsilon_greedy") {
+        // 90% exploit to best ad, 10% split equally among rest
+        rawWeights = topAds.map((_, index) => (index === 0 ? 9 : 1 / Math.max(1, topAds.length - 1)));
+    } else if (algorithm === "softmax") {
+        // Temperature-weighted probability distribution
+        const tau = 2.0;
+        rawWeights = topAds.map((ad) => Math.exp(ad.ctr / tau));
+    } else {
+        // UCB default rank-boosted allocation
+        rawWeights = topAds.map((ad, index) => {
+            const rankBoost = topAds.length - index;
+            return Math.max(ad.ctr, 0.01) * rankBoost;
+        });
+    }
+
     const totalWeight = rawWeights.reduce((sum, weight) => sum + weight, 0) || topAds.length;
     let allocated = 0;
     return topAds.map((ad, index) => {
